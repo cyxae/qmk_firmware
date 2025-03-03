@@ -3,7 +3,6 @@
 
 #include "config.h"
 #include QMK_KEYBOARD_H
-#include "features/achordion.h"
 
 enum layers {
   _ALPHA,
@@ -30,11 +29,7 @@ enum custom_keycodes {
 #define CKC_RALT  KC_RALT
 #define ALT_F4    LALT(KC_F4)
 
-void matrix_scan_user(void) {
-  achordion_task();
-}
-
-bool achordion_chord(uint16_t tap_hold_keycode,
+bool get_chordal_hold(uint16_t tap_hold_keycode,
                      keyrecord_t* tap_hold_record,
                      uint16_t other_keycode,
                      keyrecord_t* other_record) {
@@ -55,14 +50,9 @@ bool achordion_chord(uint16_t tap_hold_keycode,
       if (other_keycode == CKC_LSFT) { return true; }
       if (other_keycode == CKC_BSPC) { return true; }
       break;
-    case CKC_BSPC:
-    case CKC_SPC:
-      return true;
-      break;
-    break;
   }
 
-  return achordion_opposite_hands(tap_hold_record, other_record);
+  return get_chordal_hold_default(tap_hold_record, other_record);
 }
 
 const uint16_t PROGMEM dfu_cmb[] = {KC_1, KC_BTN1, COMBO_END};
@@ -159,11 +149,17 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   )
 };
 
+const char chordal_hold_layout[MATRIX_ROWS][MATRIX_COLS] PROGMEM =
+LAYOUT_split_3x5_3(
+        'L', 'L', 'L', 'L', 'L', 'L',  'R', 'R', 'R', 'R', 'R', 'R', 
+        'L', 'L', 'L', 'L', 'L', 'L',  'R', 'R', 'R', 'R', 'R', 'R', 
+        'L', 'L', 'L', 'L', 'L', 'L',  'R', 'R', 'R', 'R', 'R', 'R', 
+                       'L', '*', 'L',  'R', '*', 'R'
+    );
+
 bool is_alt_tab_active = false;
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-  if (!process_achordion(keycode, record)) { return false; }
-
   switch(keycode) {
     case ALT_TAB:
       if (record->event.pressed) {
