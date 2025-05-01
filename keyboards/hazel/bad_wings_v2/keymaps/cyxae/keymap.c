@@ -3,7 +3,6 @@
 
 #include "config.h"
 #include QMK_KEYBOARD_H
-#include "features/achordion.h"
 
 #define HRM_A     LGUI_T(KC_A)
 #define HRM_S     LALT_T(KC_S)
@@ -27,42 +26,6 @@ enum layers {
 enum custom_keycodes {
   ALT_TAB = SAFE_RANGE,
 };
-
-void matrix_scan_user(void) {
-  achordion_task();
-}
-
-bool achordion_chord(uint16_t tap_hold_keycode,
-                     keyrecord_t* tap_hold_record,
-                     uint16_t other_keycode,
-                     keyrecord_t* other_record) {
-
-  switch (tap_hold_keycode) {
-    // Allow almost all Ctrl+<letter> as a same-hand chord on the left.
-    case CKC_D:
-      if (other_keycode == KC_W) { return true; }
-      if (other_keycode == KC_R) { return true; }
-      if (other_keycode == KC_T) { return true; }
-      if (other_keycode == CKC_A) { return true; }
-      if (other_keycode == CKC_S) { return true; }
-      if (other_keycode == KC_G) { return true; }
-      if (other_keycode == KC_Z) { return true; }
-      if (other_keycode == KC_X) { return true; }
-      if (other_keycode == KC_V) { return true; }
-      if (other_keycode == KC_B) { return true; }
-      if (other_keycode == KC_LSFT) { return true; }
-      if (other_keycode == CKC_BSPC) { return true; }
-      if (other_keycode == MS_BTN1) { return true; }
-      break;
-    case CKC_BSPC:
-    case CKC_SPC:
-      return true;
-      break;
-    break;
-  }
-
-  return achordion_opposite_hands(tap_hold_record, other_record);
-}
 
 uint16_t get_quick_tap_term(uint16_t keycode, keyrecord_t* record) {
   // If you quickly hold a tap-hold key after tapping it, the tap action is
@@ -158,8 +121,6 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 bool is_alt_tab_active = false;
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-  if (!process_achordion(keycode, record)) { return false; }
-
   switch(keycode) {
     case ALT_TAB:
       if (record->event.pressed) {
